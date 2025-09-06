@@ -17,6 +17,16 @@ export default function Board() {
   const [squares, setSquares] = useState(Array(9).fill(null));
   const [xIsNext, setxIsNext] = useState(true);
 
+  const winner = claculateWinner(squares);             / Calculating winner while rendering./
+  let status;
+
+  if(winner){
+    status = `Winner: ${winner}`;
+  }
+  else{
+    status = "Next Player: " + ((xIsNext)? "X":"O");
+  }
+
   function claculateWinner(squares) {
     const lines = [
       [0, 1, 2],
@@ -36,15 +46,16 @@ export default function Board() {
         squares[a] === squares[c] &&
         squares[a] !== null
       ) {
-        return `Winner is : ${squares[a]}`;
+        return squares[a];
       }
     }
     return null;
   }
 
-  const [winner, setWinner] = useState(null);
-
   function handleClick(index) {
+    if(winner!==null){
+      return;
+    }
     const nextSquares = squares.slice();
     if (nextSquares[index] === null) {
       if (xIsNext) {
@@ -54,15 +65,13 @@ export default function Board() {
         nextSquares[index] = "O";
         setxIsNext(true);
       }
-    }
-    setWinner(claculateWinner(nextSquares));
-    console.log("From handleClick: ", winner);
-    setSquares(nextSquares);
+       setSquares(nextSquares); 
+    }   
   }
 
   return (
     <>
-      {winner !== null ? <h1>{console.log("Render: ", winner)}</h1> : null}
+      <h1>{status}</h1>
       <div className="flex">
         <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
         <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
