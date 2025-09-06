@@ -42,7 +42,7 @@ export default function Board() {
     return null;
   }
 
-  let winner;
+  const [winner, setWinner] = useState(null);
 
   function handleClick(index) {
     const nextSquares = squares.slice();
@@ -55,7 +55,7 @@ export default function Board() {
         setxIsNext(true);
       }
     }
-    winner = claculateWinner(nextSquares);
+    setWinner(claculateWinner(nextSquares));
     console.log("From handleClick: ", winner);
     setSquares(nextSquares);
   }
