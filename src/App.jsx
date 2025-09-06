@@ -55,7 +55,7 @@ export default function Board() {
         setxIsNext(true);
       }
     }
-    winner = claculateWinner(nextSquares);             / Calculating winner inside event handler. /
+    winner = claculateWinner(nextSquares);             <mark> / Calculating winner inside event handler. / </mark>
     console.log("From handleClick: ", winner);
     setSquares(nextSquares);
   }
