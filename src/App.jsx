@@ -13,56 +13,36 @@ function Square({ value, onSquareClick }) {
   );
 }
 
-export default function Board() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
-  const [xIsNext, setxIsNext] = useState(true);
+function Board({xIsNext, squares, onPlay}) {
 
-  function claculateWinner(squares) {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
+  const winner = claculateWinner(squares);             / Calculating winner while rendering./
+  let status;
 
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (
-        squares[a] === squares[b] &&
-        squares[a] === squares[c] &&
-        squares[a] !== null
-      ) {
-        return `Winner is : ${squares[a]}`;
-      }
-    }
-    return null;
+  if(winner){
+    status = `Winner: ${winner}`;
+  }
+  else{
+    status = "Next Player: " + ((xIsNext)? "X":"O");
   }
 
-  const [winner, setWinner] = useState(null);
-
   function handleClick(index) {
+    if(winner!==null){
+      return;
+    }
     const nextSquares = squares.slice();
     if (nextSquares[index] === null) {
       if (xIsNext) {
         nextSquares[index] = "X";
-        setxIsNext(false);
       } else {
         nextSquares[index] = "O";
-        setxIsNext(true);
       }
-    }
-    setWinner(claculateWinner(nextSquares));
-    console.log("From handleClick: ", winner);
-    setSquares(nextSquares);
+      onPlay(nextSquares);
+    }  
   }
 
   return (
     <>
-      {winner !== null ? <h1>{console.log("Render: ", winner)}</h1> : null}
+      <h1>{status}</h1>
       <div className="flex">
         <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
         <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
@@ -81,3 +61,79 @@ export default function Board() {
     </>
   );
 }
+
+export default function Game(){
+
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [xIsNext, setxIsNext] = useState(true);
+  const [currentMove, setCurrentMove] = useState(0);
+
+  const currentSquare = history[currentMove];     / Passing to board which array of move we want to show. We are not setting history in jumpTo but when there is click in the square./
+
+
+  function handlePlay(nextSquares){
+    (xIsNext === true)? setxIsNext(false) : setxIsNext(true);
+    const nextHistory = [...history.slice(0, currentMove+1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length-1);
+  }
+
+  function jumpTo(index){
+    setCurrentMove(index);
+    setxIsNext(index%2===0);
+  }
+
+  const moves = history.map((squares, index)=> {
+    let description;
+    if(index>0){
+      description = `Go to the move # ${index}`;
+    }
+    else{
+      description = `make your first move`;
+    }
+
+    return(
+      <li key = {index}>
+        <button onClick={()=> jumpTo(index)}>{description}</button>
+      </li>
+    )
+  });
+
+  return(
+    <div>
+      <div>
+        <Board xIsNext={xIsNext} squares={currentSquare} onPlay = {handlePlay}/>
+      </div>
+      <div>
+        <ol>
+         {moves}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+function claculateWinner(squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (
+        squares[a] === squares[b] &&
+        squares[a] === squares[c] &&
+        squares[a] !== null
+      ) {
+        return squares[a];
+      }
+    }
+    return null;
+  }
